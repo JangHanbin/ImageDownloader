@@ -2,9 +2,9 @@ import requests
 import os
 from bs4 import BeautifulSoup
 import base64
+import time
 
 def do_crawling():
-
     print("Number :", end=" ")
     choice = int(input())
 
@@ -62,7 +62,9 @@ def naver_crawling(url, start_num, end_num, directory):
                 # loop until take code 200
                 while r.status_code != 200:
                     r = requests.get(img["src"])
-                    
+                    print("Trying to download after 2 sec ...: " + img["src"])
+                    time.sleep(2)
+
                 print(img["src"] + " downloaded!")
                 with open("{0}/{1}/{2}.jpg".format(directory, start_num, str(file_index)), 'wb') as f:
                     f.write(r.content)
@@ -83,7 +85,7 @@ def bamtoki_crawling(url, start_num, end_num,directory):
         if not os.path.exists(directory+"/"+start_num):
             os.mkdir(directory+"/"+start_num)
 
-        res = requests.get(url +start_num.zfill(2)+".html")
+        res = requests.get(url + start_num.zfill(2)+".html")
 
         if res.status_code == 200:
             html = res.text
@@ -94,16 +96,23 @@ def bamtoki_crawling(url, start_num, end_num,directory):
 
             for encoded_content_data in encoded_content_datas:
                 decoded_content_data = str(base64.b64decode(encoded_content_data.text))
+
                 # cut <div> && " ' " to leave only img tag and reparsing by beautifulsoup
                 imgs = BeautifulSoup(decoded_content_data[decoded_content_data.find("<img"):decoded_content_data.rfind("'")], 'html.parser')
 
+                custom_headers = {
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36"
+                }
+
                 # there is don't need to add header info
                 for img in imgs:
-                    r = requests.get(img["src"])
+                    r = requests.get(img["src"], headers=custom_headers)
 
                     # loop until take code 200
                     while r.status_code != 200:
-                        r = requests.get(img["src"])
+                        r = requests.get(img["src"], headers=custom_headers)
+                        print("Trying to download after 2 sec ...: " + img["src"])
+                        time.sleep(2)
 
                     print(img["src"] + " downloaded!")
                     with open("{0}/{1}/{2}.jpg".format(directory, start_num, str(file_index)), 'wb') as f:
