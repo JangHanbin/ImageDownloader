@@ -58,12 +58,17 @@ def naver_crawling(url, start_num, end_num, directory):
 
             for img in imgs:
                 r = requests.get(img["src"], headers=custom_headers)
-                if r.status_code == 200:
-                    with open("{0}/{1}/{2}.jpg".format(directory, start_num, str(file_index)), 'wb') as f:
-                        f.write(r.content)
-                    file_index = file_index + 1
 
-        print("{0} Saved!".format(start_num))
+                # loop until take code 200
+                while r.status_code != 200:
+                    r = requests.get(img["src"])
+                    
+                print(img["src"] + " downloaded!")
+                with open("{0}/{1}/{2}.jpg".format(directory, start_num, str(file_index)), 'wb') as f:
+                    f.write(r.content)
+                file_index = file_index + 1
+
+        print("{0} of range Saved!".format(start_num))
         start_num = str(int(start_num) + 1) # add sequence
 
 #This web site img src encoded by Base64
@@ -95,12 +100,17 @@ def bamtoki_crawling(url, start_num, end_num,directory):
                 # there is don't need to add header info
                 for img in imgs:
                     r = requests.get(img["src"])
-                    if r.status_code == 200:
-                        with open("{0}/{1}/{2}.jpg".format(directory, start_num, str(file_index)), 'wb') as f:
-                            f.write(r.content)
-                        file_index = file_index + 1
 
-        print("{0} Saved!".format(start_num))
+                    # loop until take code 200
+                    while r.status_code != 200:
+                        r = requests.get(img["src"])
+
+                    print(img["src"] + " downloaded!")
+                    with open("{0}/{1}/{2}.jpg".format(directory, start_num, str(file_index)), 'wb') as f:
+                        f.write(r.content)
+                    file_index = file_index + 1
+
+        print("{0} of range Saved!".format(start_num))
         start_num = str(int(start_num) + 1) # add sequence
 
 
