@@ -37,6 +37,8 @@ def do_crawling():
 
 def naver_crawling(url, start_num, end_num, directory):
 
+    try_count=0;
+
     if not os.path.exists(directory):
         os.mkdir(directory)
     while int(start_num) <= int(end_num):
@@ -60,23 +62,31 @@ def naver_crawling(url, start_num, end_num, directory):
                 r = requests.get(img["src"], headers=custom_headers)
 
                 # loop until take code 200
-                while r.status_code != 200:
+                while r.status_code != 200 and try_count <=10:
                     r = requests.get(img["src"])
                     print("Trying to download after 2 sec ...: " + img["src"])
                     time.sleep(2)
+                    try_count = try_count +1
+                if try_count>=10:
+                    print("Fail to Download {0} Please check server status.".format(img["src"]))
+                    print("Download skipped")
+                else:
+                    print(img["src"] + " downloaded!")
+                    with open("{0}/{1}/{2}.jpg".format(directory, start_num, str(file_index)), 'wb') as f:
+                        f.write(r.content)
+                    file_index = file_index + 1
 
-                print(img["src"] + " downloaded!")
-                with open("{0}/{1}/{2}.jpg".format(directory, start_num, str(file_index)), 'wb') as f:
-                    f.write(r.content)
-                file_index = file_index + 1
+                try_count = 0
+
+
 
         print("{0} of range Saved!".format(start_num))
         start_num = str(int(start_num) + 1) # add sequence
 
-#This web site img src encoded by Base64
 
+# This web site img src encoded by Base64
 def bamtoki_crawling(url, start_num, end_num,directory):
-
+    try_count = 0
     if not os.path.exists(directory):
         os.mkdir(directory)
 
@@ -109,14 +119,21 @@ def bamtoki_crawling(url, start_num, end_num,directory):
                     r = requests.get(img["src"], headers=custom_headers)
 
                     # loop until take code 200
-                    while r.status_code != 200:
-                        r = requests.get(img["src"], headers=custom_headers)
+                    while r.status_code != 200 and try_count <= 10:
+                        r = requests.get(img["src"])
                         print("Trying to download after 2 sec ...: " + img["src"])
                         time.sleep(2)
+                        try_count = try_count + 1
 
-                    print(img["src"] + " downloaded!")
-                    with open("{0}/{1}/{2}.jpg".format(directory, start_num, str(file_index)), 'wb') as f:
-                        f.write(r.content)
+                    if try_count >= 10:
+                        print("Fail to Download {0} Please check server status.".format(img["src"]))
+                        print("Download skipped")
+                    else:
+                        print(img["src"] + " downloaded!")
+                        with open("{0}/{1}/{2}.jpg".format(directory, start_num, str(file_index)), 'wb') as f:
+                            f.write(r.content)
+
+                    try_count = 0
                     file_index = file_index + 1
 
         print("{0} of range Saved!".format(start_num))
